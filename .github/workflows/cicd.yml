@@ -21,7 +21,6 @@ jobs:
           node-version: 24
           check-latest: true
           registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
       - run: npm run build --if-present
       - run: npm test
       - run: npm publish
