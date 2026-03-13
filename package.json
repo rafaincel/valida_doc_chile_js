@@ -1,0 +1,29 @@
+{
+    "name": "valida_doc_chile",
+    "version": "0.0.1",
+    "description": "Valida documentos de identidad de Chile",
+    "main": "index.js",
+    "type": "commonjs",
+    "scripts": {
+        "test": "node test.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rafaincel/valida_doc_chile_js.git"
+    },
+    "keywords": [
+        "registro_civil",
+        "webservice",
+        "chile",
+        "api"
+    ],
+    "author": "rafaincel",
+    "engines": {
+        "node": ">=4"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/rafaincel/valida_doc_chile_js/issues"
+    },
+    "homepage": "https://github.com/rafaincel/valida_doc_chile_js#readme"
+}
