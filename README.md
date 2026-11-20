@@ -1,6 +1,6 @@
 # valida_doc_chile
 
-Librería en Node.js para validar la vigencia de documentos de identidad chilenos (cédula y pasaporte) usando la API pública de [regcivil.impish.top](https://regcivil.impish.top/).
+Librería en Node.js para validar la vigencia de documentos de identidad chilenos (cédula y pasaporte) usando la API pública de [impishapi.com](https://impishapi.com/vigencia-documento-identidad/).
 
 ## Instalación
 
@@ -46,9 +46,11 @@ main();
 ### Parámetros
 
 - `run`: string, RUT con guión (ej. "16273463-6").
-- `doc_num`: string, número de documento o número de serie.
+- `doc_num`: string, número de documento o número de serie (al menos 9 caracteres).
 - `doc_type`: string, `CEDULA` o `PASAPORTE`.
-- `api_key` (opcional): string para usar la API con mayor frecuencia.
+- `api_key` (opcional): token enviado en el encabezado `X-Token`.
+
+La consulta se envía como JSON a `POST /v1/query`.
 
 ### Retorno
 
@@ -68,4 +70,4 @@ La función `query(...)` retorna una promesa que resuelve con uno de los siguien
 
 ## Más información
 
-Esta librería usa la API gratuita de consulta de documentos proporcionada por [regcivil.impish.top](https://regcivil.impish.top/).
+Esta librería usa la API gratuita de consulta de documentos proporcionada por [impishapi.com](https://impishapi.com/vigencia-documento-identidad/).

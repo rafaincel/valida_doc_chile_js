@@ -1,5 +1,4 @@
 const https = require("https");
-const querystring = require("querystring");
 
 /**
  * Consulta el estado de vigencia de un documento de identidad.
@@ -7,7 +6,7 @@ const querystring = require("querystring");
  * @param {string} run Identificador de la persona (ej. "98765432-K")
  * @param {string} doc_num Número del documento (ej. "12345678")
  * @param {string} doc_type Tipo de documento: CEDULA o PASAPORTE
- * @param {string|null} api_key Clave de acceso a la API
+ * @param {string|null} api_key Token de acceso enviado como X-Token
  * @returns {Promise<string>} Promise que resuelve con el estado del documento:
  *   - "VALID": el documento está vigente
  *   - "NOT_VALID": el documento existe, pero no está vigente
@@ -15,25 +14,24 @@ const querystring = require("querystring");
  */
 function query(run, doc_num, doc_type, api_key) {
     return new Promise(function (resolve, reject) {
-        // Encode form data
-        var postData = querystring.stringify({
+        var postData = JSON.stringify({
             run: run,
-            doc_num: doc_num,
+            serial_number: doc_num,
             doc_type: doc_type
         });
 
         var options = {
             hostname: "regcivil.impish.top",
-            path: "/query",
+            path: "/v1/query",
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/json",
                 "Content-Length": Buffer.byteLength(postData)
             }
         };
 
-        if (api_key) {
-            options.headers["X-api-key"] = api_key;
+        if (api_key !== null && api_key !== undefined) {
+            options.headers["X-Token"] = api_key;
         }
 
         var req = https.request(options, function (res) {
@@ -44,16 +42,38 @@ function query(run, doc_num, doc_type, api_key) {
             });
 
             res.on("end", function () {
+                var json_data;
                 try {
-                    var json_data = JSON.parse(data);
-                    if (json_data.error) {
-                        reject(new Error("api falló: " + json_data.error_code + ": " + json_data.desc));
-                    } else {
-                        resolve(json_data.state);
-                    }
+                    json_data = JSON.parse(data);
                 } catch (e) {
-                    reject(e);
+                    reject(new Error("Invalid JSON response: " + e.message));
+                    return;
                 }
+
+                if (!json_data || typeof json_data !== "object") {
+                    reject(new Error("API returned an invalid response"));
+                    return;
+                }
+
+                var statusCode = res.statusCode || 0;
+                if (statusCode < 200 || statusCode >= 300 || json_data.error) {
+                    var message = json_data.message || json_data.detail;
+                    if (message && typeof message !== "string") {
+                        message = JSON.stringify(message);
+                    }
+                    reject(new Error(
+                        "API request failed (HTTP " + statusCode + "): " +
+                        (message || "Unknown API error")
+                    ));
+                    return;
+                }
+
+                if (["VALID", "NOT_VALID", "NO_MATCH"].indexOf(json_data.status) === -1) {
+                    reject(new Error("API returned an unknown document status"));
+                    return;
+                }
+
+                resolve(json_data.status);
             });
         });
 
